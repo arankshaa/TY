@@ -1,0 +1,137 @@
+import java.util.Scanner;
+
+public class PlayfairCipher {
+
+    private static final int SIZE = 5;
+    private static char[][] matrix = new char[SIZE][SIZE];
+
+    // Function to generate the key matrix from the key phrase
+    private static void generateMatrix(String key) {
+        String keyString = prepareKey(key);
+        boolean[] used = new boolean[26];
+        int i = 0, j = 0;
+
+        for (char c : keyString.toCharArray()) {
+            if (!used[c - 'A'] && c != 'J') {
+                matrix[i][j++] = c;
+                used[c - 'A'] = true;
+                if (j == SIZE) {
+                    j = 0;
+                    i++;
+                }
+            }
+        }
+
+        for (char c = 'A'; c <= 'Z'; c++) {
+            if (!used[c - 'A'] && c != 'J') {
+                matrix[i][j++] = c;
+                used[c - 'A'] = true;
+                if (j == SIZE) {
+                    j = 0;
+                    i++;
+                }
+            }
+        }
+    }
+
+    // Function to prepare the key phrase
+    private static String prepareKey(String key) {
+        StringBuilder preparedKey = new StringBuilder();
+        key = key.toUpperCase().replaceAll("[^A-Z]", "");
+        for (char c : key.toCharArray()) {
+            if (!preparedKey.toString().contains(String.valueOf(c))) {
+                preparedKey.append(c);
+            }
+        }
+        return preparedKey.toString();
+    }
+
+    // Function to encrypt the message using the Playfair cipher
+    private static String encrypt(String message) {
+        StringBuilder encryptedText = new StringBuilder();
+        message = message.toUpperCase().replaceAll("[^A-Z]", "").replaceAll("J", "I");
+
+        for (int i = 0; i < message.length(); i += 2) {
+            char a = message.charAt(i);
+            char b = (i + 1 < message.length()) ? message.charAt(i + 1) : 'X';
+            int[] posA = getCharPosition(a);
+            int[] posB = getCharPosition(b);
+
+            if (posA[0] == posB[0]) { // Same row
+                encryptedText.append(matrix[posA[0]][(posA[1] + 1) % SIZE]);
+                encryptedText.append(matrix[posB[0]][(posB[1] + 1) % SIZE]);
+            } else if (posA[1] == posB[1]) { // Same column
+                encryptedText.append(matrix[(posA[0] + 1) % SIZE][posA[1]]);
+                encryptedText.append(matrix[(posB[0] + 1) % SIZE][posB[1]]);
+            } else { // Different row and column
+                encryptedText.append(matrix[posA[0]][posB[1]]);
+                encryptedText.append(matrix[posB[0]][posA[1]]);
+            }
+        }
+        return encryptedText.toString();
+    }
+
+    // Function to decrypt the message using the Playfair cipher
+    private static String decrypt(String message) {
+        StringBuilder decryptedText = new StringBuilder();
+
+        for (int i = 0; i < message.length(); i += 2) {
+            char a = message.charAt(i);
+            char b = message.charAt(i + 1);
+            int[] posA = getCharPosition(a);
+            int[] posB = getCharPosition(b);
+
+            if (posA[0] == posB[0]) { // Same row
+                decryptedText.append(matrix[posA[0]][(posA[1] - 1 + SIZE) % SIZE]);
+                decryptedText.append(matrix[posB[0]][(posB[1] - 1 + SIZE) % SIZE]);
+            } else if (posA[1] == posB[1]) { // Same column
+                decryptedText.append(matrix[(posA[0] - 1 + SIZE) % SIZE][posA[1]]);
+                decryptedText.append(matrix[(posB[0] - 1 + SIZE) % SIZE][posB[1]]);
+            } else { // Different row and column
+                decryptedText.append(matrix[posA[0]][posB[1]]);
+                decryptedText.append(matrix[posB[0]][posA[1]]);
+            }
+        }
+        return decryptedText.toString();
+    }
+
+    // Function to get the position of a character in the matrix
+    private static int[] getCharPosition(char c) {
+        int[] pos = new int[2];
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (matrix[i][j] == c) {
+                    pos[0] = i;
+                    pos[1] = j;
+                    return pos;
+                }
+            }
+        }
+        return pos;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Get the key from the user
+        System.out.print("Enter the key phrase: ");
+        String key = scanner.nextLine();
+
+        // Generate the key matrix
+        generateMatrix(key);
+
+        // Get the message from the user
+        System.out.print("Enter the message: ");
+        String message = scanner.nextLine();
+
+        // Encrypt the message using the Playfair cipher
+        String encryptedText = encrypt(message);
+        System.out.println("Encrypted text: " + encryptedText);
+
+        // Decrypt the message using the Playfair cipher
+        String decryptedText = decrypt(encryptedText);
+        System.out.println("Decrypted text: " + decryptedText);
+
+        scanner.close();
+    }
+}
