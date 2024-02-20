@@ -1,0 +1,55 @@
+import java.util.Scanner;
+
+public class MultiplicativeCipher {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the plaintext: ");
+        String plaintext = scanner.nextLine();
+        System.out.print("Enter the key (an integer): ");
+        int key = scanner.nextInt();
+
+        String encryptedText = encrypt(plaintext, key);
+        System.out.println("Encrypted text: " + encryptedText);
+
+        String decryptedText = decrypt(encryptedText, key);
+        System.out.println("Decrypted text: " + decryptedText);
+
+        scanner.close();
+    }
+
+    public static String encrypt(String plaintext, int key) {
+        StringBuilder ciphertext = new StringBuilder();
+        for (int i = 0; i < plaintext.length(); i++) {
+            char ch = plaintext.charAt(i);
+            if (Character.isLetter(ch)) {
+                char shifted = (char) (((ch - 'a') * key % 26) + 'a');
+                ciphertext.append(shifted);
+            } else {
+                ciphertext.append(ch);
+            }
+        }
+        return ciphertext.toString();
+    }
+
+    public static String decrypt(String ciphertext, int key) {
+        StringBuilder plaintext = new StringBuilder();
+        // Find modular multiplicative inverse
+        int inverseKey = 0;
+        for (int i = 0; i < 26; i++) {
+            if ((key * i) % 26 == 1) {
+                inverseKey = i;
+                break;
+            }
+        }
+        for (int i = 0; i < ciphertext.length(); i++) {
+            char ch = ciphertext.charAt(i);
+            if (Character.isLetter(ch)) {
+                char shifted = (char) (((ch - 'a') * inverseKey % 26) + 'a');
+                plaintext.append(shifted);
+            } else {
+                plaintext.append(ch);
+            }
+        }
+        return plaintext.toString();
+    }
+}
