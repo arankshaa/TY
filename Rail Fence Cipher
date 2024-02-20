@@ -1,0 +1,122 @@
+import java.util.Scanner;
+
+public class RailFenceCipher {
+
+    // Function to encrypt a message using the Rail Fence cipher
+    public static String encrypt(String message, int rails) {
+        char[][] railMatrix = new char[rails][message.length()];
+        for (int i = 0; i < rails; i++) {
+            for (int j = 0; j < message.length(); j++) {
+                railMatrix[i][j] = '\n';
+            }
+        }
+
+        // Build the rail fence matrix
+        boolean downward = false;
+        int row = 0, col = 0;
+        for (int i = 0; i < message.length(); i++) {
+            if (row == 0 || row == rails - 1) {
+                downward = !downward;
+            }
+            railMatrix[row][col++] = message.charAt(i);
+            if (downward) {
+                row++;
+            } else {
+                row--;
+            }
+        }
+
+        // Construct the encrypted message from the rail fence matrix
+        StringBuilder encryptedText = new StringBuilder();
+        for (int i = 0; i < rails; i++) {
+            for (int j = 0; j < message.length(); j++) {
+                if (railMatrix[i][j] != '\n') {
+                    encryptedText.append(railMatrix[i][j]);
+                }
+            }
+        }
+
+        return encryptedText.toString();
+    }
+
+    // Function to decrypt a message using the Rail Fence cipher
+    public static String decrypt(String encryptedText, int rails) {
+        char[][] railMatrix = new char[rails][encryptedText.length()];
+        for (int i = 0; i < rails; i++) {
+            for (int j = 0; j < encryptedText.length(); j++) {
+                railMatrix[i][j] = '\n';
+            }
+        }
+
+        // Build the rail fence matrix
+        boolean downward = false;
+        int row = 0, col = 0;
+        for (int i = 0; i < encryptedText.length(); i++) {
+            if (row == 0) {
+                downward = true;
+            }
+            if (row == rails - 1) {
+                downward = false;
+            }
+            railMatrix[row][col++] = '*'; // '*' represents a placeholder for encrypted character
+            if (downward) {
+                row++;
+            } else {
+                row--;
+            }
+        }
+
+        // Fill the rail fence matrix with characters from the encrypted text
+        int index = 0;
+        for (int i = 0; i < rails; i++) {
+            for (int j = 0; j < encryptedText.length(); j++) {
+                if (railMatrix[i][j] == '*' && index < encryptedText.length()) {
+                    railMatrix[i][j] = encryptedText.charAt(index++);
+                }
+            }
+        }
+
+        // Reconstruct the decrypted message from the rail fence matrix
+        StringBuilder decryptedText = new StringBuilder();
+        row = 0;
+        col = 0;
+        for (int i = 0; i < encryptedText.length(); i++) {
+            if (row == 0) {
+                downward = true;
+            }
+            if (row == rails - 1) {
+                downward = false;
+            }
+            if (railMatrix[row][col] != '*') {
+                decryptedText.append(railMatrix[row][col++]);
+            }
+            if (downward) {
+                row++;
+            } else {
+                row--;
+            }
+        }
+
+        return decryptedText.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Get the message and number of rails from the user
+        System.out.print("Enter the message: ");
+        String message = scanner.nextLine();
+        System.out.print("Enter the number of rails: ");
+        int rails = scanner.nextInt();
+
+        // Encrypt the message using the Rail Fence cipher
+        String encryptedText = encrypt(message, rails);
+        System.out.println("Encrypted text: " + encryptedText);
+
+        // Decrypt the message using the Rail Fence cipher
+        String decryptedText = decrypt(encryptedText, rails);
+        System.out.println("Decrypted text: " + decryptedText);
+
+        scanner.close();
+    }
+}
